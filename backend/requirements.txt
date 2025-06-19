@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+python-jose[cryptography]
+passlib[bcrypt]
+sqlmodel
+bcrypt==3.2.2
+ldap3
+cryptography
