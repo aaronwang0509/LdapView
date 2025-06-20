@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 from api import auth, business, admin
 from core.init import run_all
@@ -8,6 +9,14 @@ from core.init import run_all
 app = FastAPI()
 
 run_all()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # frontend origin
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"],
+)
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
