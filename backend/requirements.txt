@@ -1,3 +1,4 @@
+# python_version >= "3.12"
 fastapi
 uvicorn
 python-jose[cryptography]
