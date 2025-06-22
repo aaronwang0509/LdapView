@@ -208,3 +208,6 @@ htmlcov/
 
 # Key
 *.key
+
+# Release
+release/ldapview*.zip
