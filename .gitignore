@@ -211,3 +211,5 @@ htmlcov/
 
 # Release
 release/ldapview*.zip
+
+# test
