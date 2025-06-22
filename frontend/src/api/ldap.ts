@@ -1,8 +1,9 @@
 // src/api/ldap.ts
 import axios from 'axios';
+import config from '../config';
 
-const SEARCH_API = 'http://localhost:8000/api/ldap/search';
-const MODIFY_API = 'http://localhost:8000/api/ldap/modify';
+const SEARCH_API = `${config.ldapSearchApi}`;
+const MODIFY_API = `${config.ldapModifyApi}`;
 
 export async function ldapSearch({
   connectionId,

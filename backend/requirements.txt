@@ -7,3 +7,4 @@ sqlmodel
 bcrypt==3.2.2
 ldap3
 cryptography
+python-dotenv

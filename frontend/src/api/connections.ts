@@ -1,7 +1,8 @@
 // src/api/connections.ts
 import axios from 'axios';
+import config from '../config';
 
-const API = 'http://localhost:8000/api/connections';
+const API = `${config.connectionsApi}`;
 
 export async function getConnections() {
   const token = localStorage.getItem('token');
