@@ -1,6 +1,5 @@
 // src/components/ConnectionManager.tsx
 import { useEffect, useState } from 'react';
-import { getConnections, updateConnection } from '../api/connections';
 import {
   Box,
   Heading,
@@ -14,27 +13,54 @@ import {
   Switch,
   Input,
   Button,
+  IconButton,
   TableContainer,
   useToast,
 } from '@chakra-ui/react';
+import { AddIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
+import {
+  getConnections,
+  updateConnection,
+  createConnection,
+  deleteConnection,
+} from '../api/connections';
+
+declare global {
+  interface Window {
+    connectionIds: number[];
+  }
+}
 
 export default function ConnectionManager() {
   const [connections, setConnections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [edited, setEdited] = useState<{ [id: number]: any }>({});
+  const [adding, setAdding] = useState(false);
+  const [newConn, setNewConn] = useState({
+    name: '',
+    hostname: '',
+    port: '',
+    bind_dn: '',
+    password: '',
+    use_ssl: true,
+  });
+
   const toast = useToast();
 
+  const refreshConnections = async () => {
+    const updated = await getConnections();
+    setConnections(updated);
+    window.connectionIds = updated.map((conn: any) => conn.id);
+  };
+
   useEffect(() => {
-    getConnections()
-      .then(setConnections)
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    refreshConnections().finally(() => setLoading(false));
   }, []);
 
   const handleChange = (id: number, field: string, value: any) => {
     setEdited(prev => ({
       ...prev,
-      [id]: { ...prev[id], [field]: value }
+      [id]: { ...prev[id], [field]: value },
     }));
   };
 
@@ -43,16 +69,74 @@ export default function ConnectionManager() {
     if (!changes) return;
     try {
       await updateConnection(id, changes);
-      toast({ title: 'Connection updated', status: 'success', duration: 2000, isClosable: true });
+      toast({
+        title: 'Connection updated',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
       setEdited(prev => {
         const copy = { ...prev };
         delete copy[id];
         return copy;
       });
-      const updated = await getConnections();
-      setConnections(updated);
+      await refreshConnections();
     } catch (err) {
-      toast({ title: 'Failed to update connection', status: 'error', duration: 3000, isClosable: true });
+      toast({
+        title: 'Failed to update connection',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleAdd = async () => {
+    try {
+      await createConnection({ ...newConn, port: parseInt(newConn.port) });
+      toast({
+        title: 'Connection created',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
+      setNewConn({
+        name: '',
+        hostname: '',
+        port: '',
+        bind_dn: '',
+        password: '',
+        use_ssl: true,
+      });
+      setAdding(false);
+      await refreshConnections();
+    } catch (err) {
+      toast({
+        title: 'Failed to create connection',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteConnection(id);
+      toast({
+        title: 'Connection deleted',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
+      await refreshConnections();
+    } catch (err) {
+      toast({
+        title: 'Failed to delete connection',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
@@ -60,16 +144,21 @@ export default function ConnectionManager() {
 
   return (
     <Box>
-      <Heading size="md" mb={4}>LDAP Connections</Heading>
+      <Heading size="md" mb={4}>
+        LDAP Connections
+      </Heading>
+
       <TableContainer border="1px solid" borderColor="gray.100" borderRadius="md">
         <Table variant="simple" size="sm">
           <Thead bg="gray.100">
             <Tr>
+              <Th>ID</Th>
               <Th>Name</Th>
               <Th>Hostname</Th>
               <Th>Port</Th>
               <Th>Bind DN</Th>
               <Th>SSL</Th>
+              {adding ? <Th>Password</Th> : null}
               <Th>Action</Th>
             </Tr>
           </Thead>
@@ -78,18 +167,23 @@ export default function ConnectionManager() {
               const edit = edited[conn.id] || {};
               return (
                 <Tr key={conn.id}>
+                  <Td>{conn.id}</Td>
                   <Td>
                     <Input
                       size="sm"
                       value={edit.name ?? conn.name}
-                      onChange={(e) => handleChange(conn.id, 'name', e.target.value)}
+                      onChange={e =>
+                        handleChange(conn.id, 'name', e.target.value)
+                      }
                     />
                   </Td>
                   <Td>
                     <Input
                       size="sm"
                       value={edit.hostname ?? conn.hostname}
-                      onChange={(e) => handleChange(conn.id, 'hostname', e.target.value)}
+                      onChange={e =>
+                        handleChange(conn.id, 'hostname', e.target.value)
+                      }
                     />
                   </Td>
                   <Td>
@@ -97,36 +191,151 @@ export default function ConnectionManager() {
                       size="sm"
                       type="number"
                       value={edit.port ?? conn.port}
-                      onChange={(e) => handleChange(conn.id, 'port', parseInt(e.target.value))}
+                      onChange={e =>
+                        handleChange(conn.id, 'port', parseInt(e.target.value))
+                      }
                     />
                   </Td>
                   <Td>
                     <Input
                       size="sm"
                       value={edit.bind_dn ?? conn.bind_dn}
-                      onChange={(e) => handleChange(conn.id, 'bind_dn', e.target.value)}
+                      onChange={e =>
+                        handleChange(conn.id, 'bind_dn', e.target.value)
+                      }
                     />
                   </Td>
                   <Td>
-                    <Switch
-                      isChecked={edit.use_ssl ?? conn.use_ssl}
-                      onChange={(e) => handleChange(conn.id, 'use_ssl', e.target.checked)}
-                    />
+                    <Box display="flex" alignItems="center" justifyContent="center">
+                      <Switch
+                        isChecked={edit.use_ssl ?? conn.use_ssl}
+                        onChange={e =>
+                          handleChange(conn.id, 'use_ssl', e.target.checked)
+                        }
+                        colorScheme="green"
+                      />
+                    </Box>
                   </Td>
+                  {adding ? <Td /> : null}
                   <Td>
-                    <Button size="sm" colorScheme="blue" onClick={() => handleSave(conn.id)}>
+                    <Button
+                      size="sm"
+                      colorScheme="blue"
+                      mr={2}
+                      onClick={() => handleSave(conn.id)}
+                    >
                       Save
                     </Button>
+                    <IconButton
+                      aria-label="Delete"
+                      icon={<DeleteIcon />}
+                      size="sm"
+                      colorScheme="red"
+                      onClick={() => handleDelete(conn.id)}
+                    />
                   </Td>
                 </Tr>
               );
             })}
+
+            {adding && (
+              <Tr>
+                <Td>New</Td>
+                <Td>
+                  <Input
+                    size="sm"
+                    value={newConn.name}
+                    onChange={e =>
+                      setNewConn({ ...newConn, name: e.target.value })
+                    }
+                  />
+                </Td>
+                <Td>
+                  <Input
+                    size="sm"
+                    value={newConn.hostname}
+                    onChange={e =>
+                      setNewConn({ ...newConn, hostname: e.target.value })
+                    }
+                  />
+                </Td>
+                <Td>
+                  <Input
+                    size="sm"
+                    type="number"
+                    value={newConn.port}
+                    onChange={e =>
+                      setNewConn({ ...newConn, port: e.target.value })
+                    }
+                  />
+                </Td>
+                <Td>
+                  <Input
+                    size="sm"
+                    value={newConn.bind_dn}
+                    onChange={e =>
+                      setNewConn({ ...newConn, bind_dn: e.target.value })
+                    }
+                  />
+                </Td>
+                <Td>
+                  <Box display="flex" alignItems="center" justifyContent="center">
+                    <Switch
+                      isChecked={newConn.use_ssl}
+                      onChange={e =>
+                        setNewConn({ ...newConn, use_ssl: e.target.checked })
+                      }
+                      colorScheme="green"
+                    />
+                  </Box>
+                </Td>
+                <Td>
+                  <Input
+                    size="sm"
+                    type="password"
+                    value={newConn.password}
+                    onChange={e =>
+                      setNewConn({ ...newConn, password: e.target.value })
+                    }
+                  />
+                </Td>
+                <Td>
+                  <Button size="sm" colorScheme="green" mr={2} onClick={handleAdd}>
+                    Save
+                  </Button>
+                  <IconButton
+                    aria-label="Cancel"
+                    icon={<CloseIcon />}
+                    size="sm"
+                    onClick={() => {
+                      setAdding(false);
+                      setNewConn({
+                        name: '',
+                        hostname: '',
+                        port: '',
+                        bind_dn: '',
+                        password: '',
+                        use_ssl: true,
+                      });
+                    }}
+                  />
+                </Td>
+              </Tr>
+            )}
           </Tbody>
         </Table>
       </TableContainer>
+
+      {!adding && (
+        <Button
+          leftIcon={<AddIcon />}
+          colorScheme="blue"
+          mt={4}
+          onClick={() => setAdding(true)}
+        >
+          Add Connection
+        </Button>
+      )}
     </Box>
   );
 }
-
-
-

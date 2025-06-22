@@ -148,7 +148,13 @@ def ldap_search(req: business_models.LDAPSearchRequest, user: db_models.Identity
         ldap_conn = Connection(server, user=conn_entry.bind_dn, password=decrypt_password(conn_entry.encrypted_password), auto_bind=True)
 
         ldap_conn.search(search_base=req.base_dn, search_filter=req.filter, attributes=req.attributes)
-        results = [entry.entry_attributes_as_dict for entry in ldap_conn.entries]
+        results = [
+            {
+                "dn": entry.entry_dn,
+                "attributes": entry.entry_attributes_as_dict
+            }
+            for entry in ldap_conn.entries
+        ]
         ldap_conn.unbind()
 
         return results

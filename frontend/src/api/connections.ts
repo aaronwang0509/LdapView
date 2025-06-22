@@ -36,3 +36,11 @@ export async function updateConnection(id: number, updates: any) {
   });
   return response.data;
 }
+
+export async function deleteConnection(id: number) {
+  const token = localStorage.getItem('token');
+  const response = await axios.delete(`${API}/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
