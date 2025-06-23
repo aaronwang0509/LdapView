@@ -14,7 +14,8 @@ backend_dir = project_root / "backend"
 build_output = frontend_dir / "build"
 release_out = release_dir / "ldapview"
 env_file = release_dir / ".env"
-start_script = release_dir / "start.sh"
+start_script_sh = release_dir / "start.sh"
+start_script_ps = release_dir / "start.ps1"
 config_src = release_dir / "config.ts"
 config_backup = frontend_src / "config.ts.backup"
 config_target = frontend_src / "config.ts"
@@ -73,8 +74,9 @@ shutil.copytree(backend_dir, release_out / "backend", ignore=ignore_patterns, di
 # Copy .env into backend
 shutil.copy(env_file, release_out / "backend" / ".env")
 
-# Copy start.sh
-shutil.copy(start_script, release_out / "start.sh")
+# Copy start scripts
+shutil.copy(start_script_sh, release_out / "start.sh")
+shutil.copy(start_script_ps, release_out / "start.ps1")
 
 # Zip the whole release
 with zipfile.ZipFile(release_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
