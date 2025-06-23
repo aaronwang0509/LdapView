@@ -80,7 +80,11 @@ export default function DashboardPage() {
           maxHeight="500px"
           overflow="auto"
         >
-          <LdapResultTable results={results} onRefresh={handleSearch} />
+          <LdapResultTable
+            results={results}
+            onRefresh={handleSearch}
+            connectionId={connectionId ? parseInt(connectionId) : null}
+          />
         </Box>
       </Stack>
     </Container>

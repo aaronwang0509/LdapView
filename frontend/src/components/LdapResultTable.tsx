@@ -19,11 +19,11 @@ import { CheckIcon, CloseIcon, DeleteIcon } from '@chakra-ui/icons';
 interface Props {
   results: any[];
   onRefresh: () => void;
+  connectionId: number | null;
 }
 
-export default function LdapResultTable({ results, onRefresh }: Props) {
+export default function LdapResultTable({ results, onRefresh, connectionId }: Props) {
   const [editing, setEditing] = useState<{ [dn: string]: any }>({});
-  const [connectionId, setConnectionId] = useState<number | null>(null);
   const [resultsRefresh, setResultsRefresh] = useState(Date.now());
   const toast = useToast();
 
@@ -32,22 +32,6 @@ export default function LdapResultTable({ results, onRefresh }: Props) {
     setResultsRefresh(Date.now());
     console.log('[LdapResultTable] Results updated, clearing edits and refreshing table');
   }, [results]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const ids = (window as any).connectionIds;
-      if (Array.isArray(ids) && ids.length > 0) {
-        setConnectionId(ids[0]);
-        clearInterval(interval);
-      }
-    }, 200);
-
-    const timeout = setTimeout(() => clearInterval(interval), 5000);
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
-  }, []);
 
   if (!results || results.length === 0) return null;
 
