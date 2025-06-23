@@ -1,5 +1,3 @@
-
-
 // src/config.ts
 const config = {
   authApi: 'http://localhost:8000/auth',

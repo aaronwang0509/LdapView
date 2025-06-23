@@ -1,7 +1,7 @@
 // src/pages/DashboardPage.tsx
-import { Box, Container, Heading, Stack } from '@chakra-ui/react';
+import { Box, Container, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { ldapSearch } from '../api/ldap';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ConnectionManager from '../components/ConnectionManager';
 import LdapSearchPanel from '../components/LdapSearchPanel';
 import LdapResultTable from '../components/LdapResultTable';
@@ -12,6 +12,19 @@ export default function DashboardPage() {
   const [filter, setFilter] = useState('');
   const [attributes, setAttributes] = useState('');
   const [results, setResults] = useState<any[]>([]);
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUsername(payload.sub || payload.username || 'Unknown');
+      } catch {
+        setUsername('Unknown');
+      }
+    }
+  }, []);
 
   const handleSearch = async () => {
     if (!connectionId) return;
@@ -37,7 +50,10 @@ export default function DashboardPage() {
 
   return (
     <Container maxW="container.lg" py={10}>
-      <Heading mb={6}>Welcome to the Dashboard</Heading>
+      <Flex justify="space-between" align="center" mb={6}>
+        <Heading>Dashboard</Heading>
+        <Text fontSize="md" color="gray.600" fontWeight="medium">{username}</Text>
+      </Flex>
       <Stack spacing={8}>
         <Box borderWidth={1} p={4} borderRadius="md">
           <ConnectionManager />
