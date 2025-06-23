@@ -1,6 +1,6 @@
 {
-    "version": "0.0.2",
-    "description": "Release configuration for the project",
+    "version": "0.0.3",
+    "commit_msg": "",
     "author": "Aaron Wang",
     "license": "MIT"
 }

@@ -9,7 +9,6 @@ import {
   Select,
   VStack,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
 
 export default function LdapSearchPanel({
   connectionId,
@@ -21,6 +20,7 @@ export default function LdapSearchPanel({
   attributes,
   setAttributes,
   onSearch,
+  connectionIds,
 }: {
   connectionId: string;
   setConnectionId: (val: string) => void;
@@ -31,26 +31,8 @@ export default function LdapSearchPanel({
   attributes: string;
   setAttributes: (val: string) => void;
   onSearch: () => void;
+  connectionIds: number[];
 }) {
-  const [availableIds, setAvailableIds] = useState<number[]>([]);
-
-  useEffect(() => {
-    // Poll for window.connectionIds to become available
-    const interval = setInterval(() => {
-      const ids = (window as any).connectionIds;
-      if (Array.isArray(ids)) {
-        setAvailableIds(ids);
-        clearInterval(interval);
-      }
-    }, 200);
-
-    const timeout = setTimeout(() => clearInterval(interval), 5000);
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
-  }, []);
-
   return (
     <Box>
       <Box fontWeight="semibold" mb={4}>LDAP Search</Box>
@@ -63,7 +45,7 @@ export default function LdapSearchPanel({
               value={connectionId}
               onChange={(e) => setConnectionId(e.target.value)}
             >
-              {availableIds.map((id: number) => (
+              {connectionIds.map((id: number) => (
                 <option key={id} value={id}>
                   {id}
                 </option>

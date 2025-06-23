@@ -1,5 +1,5 @@
 // src/components/ConnectionManager.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Box,
   Heading,
@@ -31,7 +31,11 @@ declare global {
   }
 }
 
-export default function ConnectionManager() {
+interface ConnectionManagerProps {
+  onUpdateConnections?: (ids: number[]) => void;
+}
+
+export default function ConnectionManager({ onUpdateConnections }: ConnectionManagerProps) {
   const [connections, setConnections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [edited, setEdited] = useState<{ [id: number]: any }>({});
@@ -47,15 +51,19 @@ export default function ConnectionManager() {
 
   const toast = useToast();
 
-  const refreshConnections = async () => {
+  const refreshConnections = useCallback(async () => {
     const updated = await getConnections();
     setConnections(updated);
-    window.connectionIds = updated.map((conn: any) => conn.id);
-  };
+    const ids = updated.map((conn: any) => conn.id);
+    window.connectionIds = ids;
+    if (onUpdateConnections) {
+      onUpdateConnections(ids);
+    }
+  }, [onUpdateConnections]);
 
   useEffect(() => {
     refreshConnections().finally(() => setLoading(false));
-  }, []);
+  }, [refreshConnections]);
 
   const handleChange = (id: number, field: string, value: any) => {
     setEdited(prev => ({

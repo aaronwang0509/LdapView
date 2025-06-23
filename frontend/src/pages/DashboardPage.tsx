@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const [attributes, setAttributes] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [username, setUsername] = useState('');
+  const [connectionIds, setConnectionIds] = useState<number[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -56,7 +57,7 @@ export default function DashboardPage() {
       </Flex>
       <Stack spacing={8}>
         <Box borderWidth={1} p={4} borderRadius="md">
-          <ConnectionManager />
+          <ConnectionManager onUpdateConnections={setConnectionIds} />
         </Box>
         <Box borderWidth={1} p={4} borderRadius="md">
           <LdapSearchPanel
@@ -69,6 +70,7 @@ export default function DashboardPage() {
             attributes={attributes}
             setAttributes={setAttributes}
             onSearch={handleSearch}
+            connectionIds={connectionIds}
           />
         </Box>
         <Box
