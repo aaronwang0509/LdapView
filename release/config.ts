@@ -1,9 +1,12 @@
 // src/config.ts
+const baseApi = 'http://localhost:8000';
+
 const config = {
-  authApi: 'http://localhost:8000/auth',
-  connectionsApi: 'http://localhost:8000/api/connections',
-  ldapSearchApi: 'http://localhost:8000/api/ldap/search',
-  ldapModifyApi: 'http://localhost:8000/api/ldap/modify',
+  baseApi,
+  authApi: `${baseApi}/auth`,
+  connectionsApi: `${baseApi}/api/connections`,
+  ldapSearchApi: `${baseApi}/api/ldap/search`,
+  ldapModifyApi: `${baseApi}/api/ldap/modify`,
 };
 
 export default config;
