@@ -20,3 +20,10 @@ export async function register(username: string, email: string, password: string
   });
   return response.data;
 }
+
+export async function refreshToken(refreshToken: string) {
+  const response = await axios.post(`${API}/refresh`, {
+    refresh_token: refreshToken,
+  });
+  return response.data;
+}

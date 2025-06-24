@@ -12,6 +12,7 @@ export default function LoginForm() {
     try {
       const data = await login(username, password);
       localStorage.setItem('token', data.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
       window.location.href = '/dashboard'; // Placeholder
     } catch (err) {
       setError('Login failed');

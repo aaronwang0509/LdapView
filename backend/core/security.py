@@ -28,13 +28,31 @@ def encrypt_password(raw_password: str) -> str:
 def decrypt_password(encrypted_password: str) -> str:
     return fernet.decrypt(encrypted_password.encode()).decode()
 
-def create_access_token(data: dict):
+def create_token(data: dict, expires_delta: timedelta, secret_key: str = config.SECRET_KEY):
     to_encode = data.copy()
-    expire = datetime.now(UTC) + timedelta(minutes=config.ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(UTC) + expires_delta
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, config.SECRET_KEY, algorithm=config.ALGORITHM)
+    return jwt.encode(to_encode, secret_key, algorithm=config.ALGORITHM)
 
-def decode_token(token: str):
-    return jwt.decode(token, config.SECRET_KEY, algorithms=[config.ALGORITHM])
+def create_access_token(data: dict):
+    return create_token(
+        data,
+        timedelta(minutes=config.ACCESS_TOKEN_EXPIRE_MINUTES),
+        config.SECRET_KEY
+    )
 
+def create_refresh_token(data: dict):
+    return create_token(
+        data,
+        timedelta(minutes=config.REFRESH_TOKEN_EXPIRE_MINUTES),
+        config.REFRESH_SECRET_KEY
+    )
 
+def decode_token(token: str, secret_key: str = config.SECRET_KEY):
+    return jwt.decode(token, secret_key, algorithms=[config.ALGORITHM])
+
+def decode_access_token(token: str):
+    return decode_token(token, config.SECRET_KEY)
+
+def decode_refresh_token(token: str):
+    return decode_token(token, config.REFRESH_SECRET_KEY)

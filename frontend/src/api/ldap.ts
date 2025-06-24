@@ -1,5 +1,5 @@
 // src/api/ldap.ts
-import axios from 'axios';
+import axios from '../utils/axiosInstance';
 import config from '../config';
 
 const SEARCH_API = `${config.ldapSearchApi}`;
@@ -16,22 +16,12 @@ export async function ldapSearch({
   filter: string;
   attributes: string[];
 }) {
-  const token = localStorage.getItem('token');
-  const response = await axios.post(
-    SEARCH_API,
-    {
-      connection_id: connectionId,
-      base_dn: baseDn,
-      filter,
-      attributes,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    }
-  );
+  const response = await axios.post(SEARCH_API, {
+    connection_id: connectionId,
+    base_dn: baseDn,
+    filter,
+    attributes,
+  });
   return response.data; // should be a list of entry dicts
 }
 
@@ -48,20 +38,10 @@ export async function ldapModify({
     values: string[];
   }[];
 }) {
-  const token = localStorage.getItem('token');
-  const response = await axios.post(
-    MODIFY_API,
-    {
-      connection_id: connectionId,
-      dn,
-      changes,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    }
-  );
+  const response = await axios.post(MODIFY_API, {
+    connection_id: connectionId,
+    dn,
+    changes,
+  });
   return response.data;
 }

@@ -1,14 +1,11 @@
 // src/api/connections.ts
-import axios from 'axios';
+import axios from '../utils/axiosInstance';
 import config from '../config';
 
 const API = `${config.connectionsApi}`;
 
 export async function getConnections() {
-  const token = localStorage.getItem('token');
-  const response = await axios.get(API, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.get(API);
   return response.data;
 }
 
@@ -20,10 +17,8 @@ export async function createConnection(conn: {
   password: string;
   use_ssl: boolean;
 }) {
-  const token = localStorage.getItem('token');
   const response = await axios.post(API, conn, {
     headers: {
-      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
   });
@@ -31,17 +26,11 @@ export async function createConnection(conn: {
 }
 
 export async function updateConnection(id: number, updates: any) {
-  const token = localStorage.getItem('token');
-  const response = await axios.patch(`${API}/${id}`, updates, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.patch(`${API}/${id}`, updates);
   return response.data;
 }
 
 export async function deleteConnection(id: number) {
-  const token = localStorage.getItem('token');
-  const response = await axios.delete(`${API}/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.delete(`${API}/${id}`);
   return response.data;
 }

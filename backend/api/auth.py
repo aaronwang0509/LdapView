@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Body
 from passlib.context import CryptContext
-from models.user_models import UserRegister, UserLogin, Token
+from models.user_models import UserRegister, UserLogin, Token, TokenRefreshRequest
 from core import db, security
 from core.logger import logger
 from sqlmodel import Session, select
@@ -73,6 +73,27 @@ def login(user: UserLogin, session: Session = Depends(db.get_session)):
     if not profile.is_active:
         raise HTTPException(status_code=403, detail="User is disabled")
 
-    # Generate access token
-    token = security.create_access_token({"sub": subject, "iss": issuer, "role": profile.role})
-    return {"access_token": token, "token_type": "bearer"}
+    # Generate tokens
+    access_token = security.create_access_token({"sub": subject, "iss": issuer, "role": profile.role})
+    refresh_token = security.create_refresh_token({"sub": subject, "iss": issuer, "role": profile.role})
+
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+
+@router.post("/refresh", response_model=Token)
+def refresh_token(data: TokenRefreshRequest = Body(...)):
+    try:
+        payload = security.decode_refresh_token(data.refresh_token)
+        subject = payload.get("sub")
+        issuer = payload.get("iss")
+        role = payload.get("role", "user")
+        if not subject or not issuer:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+        new_access_token = security.create_access_token({"sub": subject, "iss": issuer, "role": role})
+        return {
+            "access_token": new_access_token,
+            "refresh_token": data.refresh_token,
+            "token_type": "bearer"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
