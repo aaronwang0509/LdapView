@@ -1,7 +1,8 @@
 // src/pages/DashboardPage.tsx
-import { Box, Container, Flex, Heading, Stack, Text } from '@chakra-ui/react';
-import { ldapSearch } from '../api/ldap';
+import { Box, Container, Flex, Heading, Stack, Text, Button } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
+import { ldapSearch } from '../api/ldap';
+import { logout } from '../utils/auth';
 import ConnectionManager from '../components/ConnectionManager';
 import LdapSearchPanel from '../components/LdapSearchPanel';
 import LdapResultTable from '../components/LdapResultTable';
@@ -53,7 +54,10 @@ export default function DashboardPage() {
     <Container maxW="container.lg" py={10}>
       <Flex justify="space-between" align="center" mb={6}>
         <Heading>Dashboard</Heading>
-        <Text fontSize="md" color="gray.600" fontWeight="medium">{username}</Text>
+        <Flex align="center" gap={4}>
+          <Text fontSize="md" color="gray.600" fontWeight="medium">{username}</Text>
+          <Button size="sm" colorScheme="red" onClick={logout}>Logout</Button>
+        </Flex>
       </Flex>
       <Stack spacing={8}>
         <Box borderWidth={1} p={4} borderRadius="md">
