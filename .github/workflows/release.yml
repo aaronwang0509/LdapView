@@ -1,13 +1,51 @@
 # .github/workflows/release.yml
-name: Minimal CI Test
+name: LdapView CI Build
 
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
 
 jobs:
-  say-hello:
+  build-release:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Hello message
-        run: echo "GitHub Actions is working!"
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set npm version
+        run: npm install -g npm@10.2.0
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run Build Script
+        run: |
+          cd release
+          python build.py
+
+      - name: Archive release zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: ldapview-release
+          path: release/ldapview-*.zip
