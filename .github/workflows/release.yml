@@ -48,13 +48,15 @@ jobs:
           cd release
           python build.py
 
-      - name: Extract Version and Prerelease
+      - name: Extract Version, Prerelease and Release Flag
         id: vars
         run: |
           VERSION=$(jq -r '.version' release/release.json)
           PRERELEASE=$(jq -r '.prerelease' release/release.json)
+          RELEASE=$(jq -r '.release' release/release.json)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "prerelease=$PRERELEASE" >> "$GITHUB_OUTPUT"
+          echo "release=$RELEASE" >> "$GITHUB_OUTPUT"
 
       - name: Archive release zip
         uses: actions/upload-artifact@v4
@@ -63,6 +65,7 @@ jobs:
           path: release/ldapview-*.zip
 
       - name: Create GitHub Release
+        if: steps.vars.outputs.release == 'true'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.vars.outputs.version }}

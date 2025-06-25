@@ -1,7 +1,8 @@
 {
     "version": "0.0.7",
+    "release": false,
     "prerelease": true,
-    "commit_msg": "",
+    "commit_msg": "test work flow",
     "author": "Aaron Wang",
     "license": "MIT"
 }
