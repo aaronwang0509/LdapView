@@ -1,5 +1,6 @@
 {
-    "version": "0.0.6",
+    "version": "0.0.7",
+    "prerelease": true,
     "commit_msg": "",
     "author": "Aaron Wang",
     "license": "MIT"
